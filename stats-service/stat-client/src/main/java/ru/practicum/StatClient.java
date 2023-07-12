@@ -22,9 +22,9 @@ import java.util.Map;
 public class StatClient {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private RestTemplate rest;
+    private final RestTemplate rest;
 
-    public void StatsClient(@Value("${client.url}") String baseUrl) {
+    public StatClient(@Value("${client.url}") String baseUrl) {
         RestTemplateBuilder builder = new RestTemplateBuilder();
 
         this.rest = builder
