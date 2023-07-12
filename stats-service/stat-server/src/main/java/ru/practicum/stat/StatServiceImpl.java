@@ -9,11 +9,14 @@ import ru.practicum.stat.model.EndpointHitMapper;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class StatServiceImpl implements StatService {
+
+    private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final StatRepository statRepository;
 
@@ -25,8 +28,8 @@ public class StatServiceImpl implements StatService {
     @Override
     public List<ViewStatsDto> getStats(String start, String end, List<String> uris, boolean unique) {
 
-        LocalDateTime startDecoded = LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), EndpointHitMapper.DATE_TIME_FORMATTER);
-        LocalDateTime endDecoded = LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), EndpointHitMapper.DATE_TIME_FORMATTER);
+        LocalDateTime startDecoded = LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), DATE_TIME_FORMATTER);
+        LocalDateTime endDecoded = LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), DATE_TIME_FORMATTER);
 
 
         if (unique) {
