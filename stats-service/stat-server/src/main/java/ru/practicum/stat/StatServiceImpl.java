@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatServiceImpl implements StatService {
 
-    private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final StatRepository statRepository;
 
