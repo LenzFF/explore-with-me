@@ -1,6 +1,7 @@
 package ru.practicum.stat;
 
 import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.ValidationException;
 import ru.practicum.dto.ViewStatsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,11 @@ public class StatServiceImpl implements StatService {
 
         LocalDateTime startDecoded = LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), DATE_TIME_FORMATTER);
         LocalDateTime endDecoded = LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), DATE_TIME_FORMATTER);
+
+
+        if (!startDecoded.isBefore(endDecoded)) {
+            throw new ValidationException("start date is after end date((");
+        }
 
 
         if (unique) {
