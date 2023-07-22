@@ -2,6 +2,7 @@ package ru.practicum;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
@@ -14,27 +15,32 @@ import ru.practicum.dto.ViewStatsDto;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class StatClient {
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private final RestTemplate rest;
     private final String baseUrl;
 
-    public StatClient(@Value("${client.url}") String baseUrl) {
+
+    public StatClient(@Value("${stat-server.url}") String baseUrl) {
         this.baseUrl = baseUrl;
+        this.rest = getRestTemplate();
     }
 
-    public List<ViewStatsDto> getStats(LocalDateTime startTime, LocalDateTime endTime, @Nullable String[] uris, @Nullable Boolean unique) {
-        String startString = startTime.format(DATE_TIME_FORMATTER);
-        String endString = endTime.format(DATE_TIME_FORMATTER);
-        String startEncoded = URLEncoder.encode(startString, StandardCharsets.UTF_8);
-        String endEncoded = URLEncoder.encode(endString, StandardCharsets.UTF_8);
+    @Bean
+    RestTemplate getRestTemplate() {
+        return new RestTemplateBuilder()
+                .uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl))
+                .build();
+    }
+
+    public List<ViewStatsDto> getStats(String startTime, String endTime, @Nullable String[] uris, @Nullable Boolean unique) {
+
+        String startEncoded = URLEncoder.encode(startTime, StandardCharsets.UTF_8);
+        String endEncoded = URLEncoder.encode(endTime, StandardCharsets.UTF_8);
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("start", startEncoded);
         parameters.put("end", endEncoded);
@@ -49,18 +55,16 @@ public class StatClient {
             parameters.put("unique", unique);
             sb.append("&unique={unique}");
         }
-        return makeAndSendGetStatsRequest(sb.toString(), parameters);
+        return makeAndSendGetStatsRequest(sb.toString(), parameters).orElse(Collections.EMPTY_LIST);
     }
 
-    public ResponseEntity<String> postStat(EndpointHitDto hit) {
-        return makeAndSendPostStatRequest("/hit", null, hit);
+    public void postStat(EndpointHitDto hit) {
+        makeAndSendPostStatRequest("/hit", null, hit);
     }
 
 
-    private <T> List<ViewStatsDto> makeAndSendGetStatsRequest(String path, @Nullable Map<String, Object> parameters) {
+    private <T> Optional<List<ViewStatsDto>> makeAndSendGetStatsRequest(String path, @Nullable Map<String, Object> parameters) {
         HttpEntity<T> requestEntity = new HttpEntity<>(null, defaultHeaders());
-
-        RestTemplate rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl)).build();
 
         ResponseEntity<List<ViewStatsDto>> statServerResponse;
         try {
@@ -72,15 +76,13 @@ public class StatClient {
                 });
             }
         } catch (HttpStatusCodeException e) {
-            return null;
+            return Optional.empty();
         }
-        return statServerResponse.getBody();
+        return Optional.ofNullable(statServerResponse.getBody());
     }
 
     private <T> ResponseEntity<String> makeAndSendPostStatRequest(String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
-
-        RestTemplate rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl)).build();
 
         ResponseEntity<String> statServerResponse;
         try {
