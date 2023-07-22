@@ -318,9 +318,10 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<EventShortDto> searchEventsAndPostHits(String text
-            , List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd
-            , Boolean onlyAvailable, String sort, int from, int size, HttpServletRequest request) {
+    public List<EventShortDto> searchEventsAndPostHits(String text, List<Long> categories, Boolean paid,
+                                                       LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                                       Boolean onlyAvailable, String sort, int from, int size,
+                                                       HttpServletRequest request) {
 
 
         postHit(request);
@@ -370,9 +371,8 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<EventFullDto> searchByAdmin(List<Long> users
-            , List<String> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd
-            , int from, int size) {
+    public List<EventFullDto> searchByAdmin(List<Long> users, List<String> states, List<Long> categories,
+                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
 
 
         Pageable pageable = PageRequest.of(from / size, size);
