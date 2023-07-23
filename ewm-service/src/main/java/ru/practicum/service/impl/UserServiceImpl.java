@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.user.NewUserRequest;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.dto.user.UserMapper;
@@ -17,12 +18,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
 
     @Override
+    @Transactional
     public UserDto createUser(NewUserRequest newUserRequest) {
         if (userRepository.findByName(newUserRequest.getName()) != null) {
             throw new DataAlreadyExistException("this name is already used - " + newUserRequest.getName());
@@ -33,6 +36,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Transactional
     public void delete(long userId) {
 
         userRepository.findById(userId)
@@ -40,6 +44,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteById(userId);
     }
+
 
     @Override
     public UserDto get(long userId) {
@@ -64,6 +69,7 @@ public class UserServiceImpl implements UserService {
 
         return getAllUsersByIdIn(ids);
     }
+
 
     @Override
     public List<UserDto> getAllUsersByIdIn(List<Long> ids) {

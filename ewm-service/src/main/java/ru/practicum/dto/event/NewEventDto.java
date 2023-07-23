@@ -25,6 +25,7 @@ public class NewEventDto {
     private String description;
 
     @NotBlank
+    @Size(max = 30)
     private String eventDate;
 
     @NotNull

@@ -11,12 +11,12 @@ import ru.practicum.service.LocationService;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LocationServiceImpl implements LocationService {
 
     private final LocationRepository locationRepository;
 
 
-    @Transactional(readOnly = true)
     @Override
     public Location create(LocationDto locationDto) {
 

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ParticipationRequestsServiceImpl implements ParticipationRequestsService {
 
     private final ParticipationRequestsRepository requestsRepository;
@@ -77,6 +78,7 @@ public class ParticipationRequestsServiceImpl implements ParticipationRequestsSe
     }
 
 
+    @Transactional
     private void updateEventConfirmedRequests(long eventId) {
         EventFullDto event = eventService.getById(eventId);
         User initiator = UserMapper.fromUserDto(userService.get(event.getInitiator().getId()));
@@ -99,6 +101,7 @@ public class ParticipationRequestsServiceImpl implements ParticipationRequestsSe
 
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelParticipationRequest(long userId, long requestId) {
 
         userService.get(userId);

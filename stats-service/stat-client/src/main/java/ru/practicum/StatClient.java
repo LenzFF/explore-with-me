@@ -1,15 +1,12 @@
 package ru.practicum;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
 
@@ -18,23 +15,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class StatClient {
 
-    private final RestTemplate rest;
-    private final String baseUrl;
+    private final StatClientConfiguration configuration;
 
-
-    public StatClient(@Value("${stat-server.url}") String baseUrl) {
-        this.baseUrl = baseUrl;
-        this.rest = getRestTemplate();
-    }
-
-    @Bean
-    RestTemplate getRestTemplate() {
-        return new RestTemplateBuilder()
-                .uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl))
-                .build();
-    }
 
     public List<ViewStatsDto> getStats(String startTime, String endTime, @Nullable String[] uris, @Nullable Boolean unique) {
 
@@ -58,6 +43,7 @@ public class StatClient {
         return makeAndSendGetStatsRequest(sb.toString(), parameters).orElse(Collections.EMPTY_LIST);
     }
 
+
     public void postStat(EndpointHitDto hit) {
         makeAndSendPostStatRequest("/hit", null, hit);
     }
@@ -65,6 +51,7 @@ public class StatClient {
 
     private <T> Optional<List<ViewStatsDto>> makeAndSendGetStatsRequest(String path, @Nullable Map<String, Object> parameters) {
         HttpEntity<T> requestEntity = new HttpEntity<>(null, defaultHeaders());
+        RestTemplate rest = configuration.getRestTemplate();
 
         ResponseEntity<List<ViewStatsDto>> statServerResponse;
         try {
@@ -81,8 +68,10 @@ public class StatClient {
         return Optional.ofNullable(statServerResponse.getBody());
     }
 
+
     private <T> ResponseEntity<String> makeAndSendPostStatRequest(String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
+        RestTemplate rest = configuration.getRestTemplate();
 
         ResponseEntity<String> statServerResponse;
         try {
@@ -96,6 +85,7 @@ public class StatClient {
         }
         return statServerResponse;
     }
+
 
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();

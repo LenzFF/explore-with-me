@@ -19,12 +19,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
 
     @Override
+    @Transactional
     public CategoryDto createCategory(CategoryDto categoryDto) {
 
         if (categoryRepository.findByName(categoryDto.getName()) != null) {

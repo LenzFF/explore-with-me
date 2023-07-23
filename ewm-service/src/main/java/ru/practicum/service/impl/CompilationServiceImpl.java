@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationMapper;
 import ru.practicum.dto.compilation.NewCompilationDto;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
@@ -27,6 +29,7 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     @Override
+    @Transactional
     public CompilationDto create(NewCompilationDto newCompilationDto) {
 
         Set<Long> eventsIds = newCompilationDto.getEvents();
@@ -44,6 +47,7 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     @Override
+    @Transactional
     public void deleteById(long compId) {
 
         compilationRepository.findById(compId)
@@ -54,6 +58,7 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     @Override
+    @Transactional
     public CompilationDto update(long compId, UpdateCompilationRequest updateRequest) {
 
         Compilation compilation = compilationRepository.findById(compId)

@@ -36,6 +36,7 @@ import static java.time.temporal.ChronoUnit.HOURS;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
 
@@ -153,6 +154,7 @@ public class EventServiceImpl implements EventService {
         return eventDto;
     }
 
+
     private void postHit(HttpServletRequest request) {
         EndpointHitDto endpointHitDto = new EndpointHitDto();
         endpointHitDto.setApp("ewm-main-event-service");
@@ -169,10 +171,12 @@ public class EventServiceImpl implements EventService {
         return new HashSet<>(eventRepository.findByIdIn(eventsIds));
     }
 
+
     @Override
     public Event findByIdAndInitiatorId(long eventId, long userId) {
         return eventRepository.findByIdAndInitiatorId(eventId, userId);
     }
+
 
     @Override
     public EventFullDto getUserEventById(long userId, long eventId) {
@@ -312,6 +316,7 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
+    @Transactional
     public Event update(Event event) {
         return eventRepository.save(event);
     }
