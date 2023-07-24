@@ -1,40 +1,31 @@
 package ru.practicum;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class StatClient {
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final String baseUrl;
+    private final StatClientConfiguration configuration;
 
-    public StatClient(@Value("${client.url}") String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
 
-    public List<ViewStatsDto> getStats(LocalDateTime startTime, LocalDateTime endTime, @Nullable String[] uris, @Nullable Boolean unique) {
-        String startString = startTime.format(DATE_TIME_FORMATTER);
-        String endString = endTime.format(DATE_TIME_FORMATTER);
-        String startEncoded = URLEncoder.encode(startString, StandardCharsets.UTF_8);
-        String endEncoded = URLEncoder.encode(endString, StandardCharsets.UTF_8);
+    public List<ViewStatsDto> getStats(String startTime, String endTime, @Nullable String[] uris, @Nullable Boolean unique) {
+
+        String startEncoded = URLEncoder.encode(startTime, StandardCharsets.UTF_8);
+        String endEncoded = URLEncoder.encode(endTime, StandardCharsets.UTF_8);
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("start", startEncoded);
         parameters.put("end", endEncoded);
@@ -49,18 +40,18 @@ public class StatClient {
             parameters.put("unique", unique);
             sb.append("&unique={unique}");
         }
-        return makeAndSendGetStatsRequest(sb.toString(), parameters);
-    }
-
-    public ResponseEntity<String> postStat(EndpointHitDto hit) {
-        return makeAndSendPostStatRequest("/hit", null, hit);
+        return makeAndSendGetStatsRequest(sb.toString(), parameters).orElse(Collections.EMPTY_LIST);
     }
 
 
-    private <T> List<ViewStatsDto> makeAndSendGetStatsRequest(String path, @Nullable Map<String, Object> parameters) {
+    public void postStat(EndpointHitDto hit) {
+        makeAndSendPostStatRequest("/hit", null, hit);
+    }
+
+
+    private <T> Optional<List<ViewStatsDto>> makeAndSendGetStatsRequest(String path, @Nullable Map<String, Object> parameters) {
         HttpEntity<T> requestEntity = new HttpEntity<>(null, defaultHeaders());
-
-        RestTemplate rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl)).build();
+        RestTemplate rest = configuration.getRestTemplate();
 
         ResponseEntity<List<ViewStatsDto>> statServerResponse;
         try {
@@ -72,15 +63,15 @@ public class StatClient {
                 });
             }
         } catch (HttpStatusCodeException e) {
-            return null;
+            return Optional.empty();
         }
-        return statServerResponse.getBody();
+        return Optional.ofNullable(statServerResponse.getBody());
     }
+
 
     private <T> ResponseEntity<String> makeAndSendPostStatRequest(String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
-
-        RestTemplate rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl)).build();
+        RestTemplate rest = configuration.getRestTemplate();
 
         ResponseEntity<String> statServerResponse;
         try {
@@ -94,6 +85,7 @@ public class StatClient {
         }
         return statServerResponse;
     }
+
 
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();

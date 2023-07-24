@@ -30,10 +30,11 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
+      - stats-server
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-main-db:5432/ewm-db
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main-db
+      - SPRING_DATASOURCE_USER=root
+      - SPRING_DATASOURCE_PASSWORD=root
       - CLIENT_URL=http://stat-server:9090
 
   ewm-db:
@@ -42,6 +43,6 @@ services:
     ports:
       - "7654:5432"
     environment:
-      - POSTGRES_DB=ewm-db
+      - POSTGRES_DB=ewm-main-db
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
