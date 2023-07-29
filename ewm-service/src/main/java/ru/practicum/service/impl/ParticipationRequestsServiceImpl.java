@@ -136,6 +136,15 @@ public class ParticipationRequestsServiceImpl implements ParticipationRequestsSe
         return requestsRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
     }
 
+    @Override
+    public ParticipationRequestDto getUserRequestOnEvent(long userId, long eventId) {
+        ParticipationRequest request = requestsRepository
+                .findAllByEventIdAndRequesterId(eventId, userId);
+        if (request == null) return null;
+
+        return ParticipationMapper.toParticipationRequestDto(request);
+    }
+
 
     private boolean isMoreAvailablePlacesToParticipate(EventFullDto event) {
         long confirmedRequests = requestsRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);

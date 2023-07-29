@@ -34,10 +34,11 @@ public class UserAdminController {
 
     @GetMapping
     public List<UserDto> getUsers(@RequestParam(name = "ids", required = false) List<Long> ids,
+                                  @RequestParam(name = "sort", required = false) String sort,
                                   @RequestParam(name = "from", defaultValue = "0") int from,
                                   @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        List<UserDto> userDtoList = userService.getUsersWithParameters(ids, from, size);
+        List<UserDto> userDtoList = userService.getUsersWithParameters(ids, sort, from, size);
         log.info("users founded. ids - {}, from - {}, size - {}", ids, from, size);
 
         return userDtoList;

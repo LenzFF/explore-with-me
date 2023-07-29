@@ -23,7 +23,8 @@ public class CompilationMapper {
         }
 
         compilationDto.setEvents(compilation.getEvents().stream()
-                .map(e -> EventMapper.toEventShortDto(e, eventsStatMap.getOrDefault(e.getId(), 0L)))
+                .map(e -> EventMapper.toEventShortDto(e,
+                        eventsStatMap.getOrDefault(e.getId(), 0L)))
                 .collect(Collectors.toSet()));
 
         return compilationDto;

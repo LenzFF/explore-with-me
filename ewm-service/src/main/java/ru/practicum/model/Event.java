@@ -64,6 +64,10 @@ public class Event {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "rating", nullable = false)
+    long rating;
+
+
     @Override
     public boolean equals(Object o) {
 
@@ -72,6 +76,7 @@ public class Event {
         Event event = (Event) o;
         return id == event.id && initiator.equals(event.initiator);
     }
+
 
     @Override
     public int hashCode() {

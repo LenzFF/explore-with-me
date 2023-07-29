@@ -24,6 +24,7 @@ import ru.practicum.model.*;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.service.*;
 
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -114,7 +115,19 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<EventShortDto> getAllUserEvents(long userId, int from, int size) {
+    @Transactional
+    public void updateEventAndInitiatorRatings(long eventId, long rating) {
+        Event event = get(eventId);
+        event.setRating(rating);
+        eventRepository.save(event);
+
+        long initiator = event.getInitiator().getId();
+        userService.updateUserRating(initiator, eventRepository.getUserRating(initiator));
+    }
+
+
+    @Override
+    public List<EventShortDto> getAllUserEvents(long userId, String sort, int from, int size) {
 
         userService.get(userId);
         PageRequest page = PageRequest.of(from / size, size, Sort.by("id").ascending());
@@ -125,19 +138,30 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList()));
 
-        return events.stream()
+        List<EventShortDto> result = events.stream()
                 .map(event -> EventMapper.toEventShortDto(event, eventsStats.getOrDefault(event.getId(), 0L)))
                 .collect(Collectors.toList());
+
+        if (sort != null && sort.equals("EVENT_RATING")) {
+            result.sort(getEventComparator(sort));
+        }
+
+        return result;
     }
 
 
     @Override
     public EventFullDto getById(long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new DataNotFoundException("event not exist, id - " + eventId));
+        Event event = get(eventId);
 
-        return EventMapper.toEventFullDto(event,
-                getEventStats(eventId));
+        return EventMapper.toEventFullDto(event, getEventStats(eventId));
+    }
+
+
+    @Override
+    public Event get(long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new DataNotFoundException("event not exist, id - " + eventId));
     }
 
 
@@ -367,17 +391,23 @@ public class EventServiceImpl implements EventService {
 
 
     private Comparator<EventShortDto> getEventComparator(String sort) {
-        if (sort.equals("EVENT_DATE")) {
-            return Comparator.comparing(EventShortDto::getEventDate);
-        } else {
-            return Comparator.comparing(EventShortDto::getViews);
+
+        switch (sort) {
+            case "EVENT_DATE":
+                return Comparator.comparing(EventShortDto::getEventDate);
+
+            case "EVENT_RATING":
+                return Comparator.comparing(EventShortDto::getRating).reversed();
+
+            default:
+                return Comparator.comparing(EventShortDto::getViews);
         }
     }
 
 
     @Override
     public List<EventFullDto> searchByAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, String sort, int from, int size) {
 
 
         Pageable pageable = PageRequest.of(from / size, size);
@@ -405,9 +435,16 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList()));
 
-        return events.stream()
+        List<EventFullDto> result = events.stream()
                 .map(e -> EventMapper.toEventFullDto(e, stat.getOrDefault(e.getId(), 0L)))
                 .collect(Collectors.toList());
+
+        if (sort != null && sort.equals("EVENT_RATING")) {
+            Comparator<EventFullDto> comparator = Comparator.comparing(EventFullDto::getRating);
+            result.sort(comparator);
+        }
+
+        return result;
     }
 
 

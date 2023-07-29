@@ -43,10 +43,11 @@ public class EventAdminController {
                                                   @RequestParam(name = "categories", required = false) List<Long> categories,
                                                   @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                                   @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                                  @RequestParam(name = "sort", required = false) String sort,
                                                   @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero int from,
                                                   @RequestParam(name = "size", defaultValue = "10") @PositiveOrZero int size) {
 
-        List<EventFullDto> events = eventService.searchByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        List<EventFullDto> events = eventService.searchByAdmin(users, states, categories, rangeStart, rangeEnd, sort, from, size);
         log.info("event search performed by the administrator");
 
         return events;

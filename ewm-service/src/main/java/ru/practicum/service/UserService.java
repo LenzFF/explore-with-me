@@ -11,9 +11,11 @@ public interface UserService {
 
     void delete(long userId);
 
-    List<UserDto> getUsersWithParameters(List<Long> ids, int from, int size);
+    List<UserDto> getUsersWithParameters(List<Long> ids, String sort, int from, int size);
 
     UserDto get(long userId);
 
     List<UserDto> getAllUsersByIdIn(List<Long> ids);
+
+    void updateUserRating(long userId, long rating);
 }

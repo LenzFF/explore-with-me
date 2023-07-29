@@ -10,8 +10,10 @@ import ru.practicum.dto.user.UserDto;
 import ru.practicum.dto.user.UserMapper;
 import ru.practicum.exception.DataAlreadyExistException;
 import ru.practicum.exception.DataNotFoundException;
+import ru.practicum.model.User;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.UserService;
+import static java.util.Comparator.comparing;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,15 +57,21 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<UserDto> getUsersWithParameters(List<Long> ids, int from, int size) {
+    public List<UserDto> getUsersWithParameters(List<Long> ids, String sort, int from, int size) {
 
         if (ids == null || ids.isEmpty()) {
             PageRequest page = PageRequest.of(from / size, size, Sort.by("id").ascending());
 
-            return userRepository.findAll(page)
+            List<UserDto> users = userRepository.findAll(page)
                     .stream()
                     .map(UserMapper::toUserDto)
                     .collect(Collectors.toList());
+
+            if (sort != null && sort.equals("USER_RATING")) {
+                users.sort(comparing(UserDto::getRating).reversed());
+            }
+
+            return users;
         }
 
 
@@ -78,6 +86,16 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional
+    public void updateUserRating(long userId, long rating) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("user not found, id - " + userId));
+        user.setRating(rating);
+        userRepository.save(user);
     }
 }
 

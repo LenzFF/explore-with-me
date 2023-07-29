@@ -1,5 +1,6 @@
 package ru.practicum.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.event.*;
 import ru.practicum.model.Event;
 
@@ -17,9 +18,14 @@ public interface EventService {
 
     EventFullDto create(long userId, NewEventDto newEventDto);
 
-    List<EventShortDto> getAllUserEvents(long userId, int from, int size);
+    @Transactional
+    void updateEventAndInitiatorRatings(long eventId, long rating);
+
+    List<EventShortDto> getAllUserEvents(long userId, String sort, int from, int size);
 
     EventFullDto getById(long eventId);
+
+    Event get(long eventId);
 
     EventFullDto getUserEventById(long userId, long eventId);
 
@@ -27,7 +33,7 @@ public interface EventService {
 
     EventFullDto updateByAdmin(long eventId, UpdateEventDto request);
 
-    List<EventFullDto> searchByAdmin(List<Long> users, List<String> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
+    List<EventFullDto> searchByAdmin(List<Long> users, List<String> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, String sort, int from, int size);
 
     EventFullDto getEventByIdAndPostHit(long eventId, HttpServletRequest request);
 
