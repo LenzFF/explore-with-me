@@ -65,7 +65,7 @@ public class Event {
     private String title;
 
     @Column(name = "rating", nullable = false)
-    long rating;
+    long rating = 0L;
 
 
     @Override

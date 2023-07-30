@@ -29,7 +29,6 @@ public class EventMapper {
         event.setPublishedOn(LocalDateTime.now());
         event.setRequestModeration(newEventDto.isRequestModeration());
         event.setTitle(newEventDto.getTitle());
-        event.setRating(0L);
         return event;
     }
 

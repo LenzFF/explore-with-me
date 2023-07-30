@@ -19,10 +19,10 @@ public class UserMapper {
     }
 
     public static User fromNewUserRequestDto(NewUserRequest newUserRequest) {
-        return new User(0L,
-                newUserRequest.getEmail(),
-                newUserRequest.getName(),
-                0L);
+        User user = new User();
+        user.setEmail(newUserRequest.getEmail());
+        user.setName(newUserRequest.getName());
+        return user;
     }
 
     public static UserShortDto toShortDto(User user) {

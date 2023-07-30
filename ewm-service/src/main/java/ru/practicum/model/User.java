@@ -24,5 +24,5 @@ public class User {
     private String name;
 
     @Column(name = "rating", nullable = false)
-    long rating;
+    long rating = 0L;
 }

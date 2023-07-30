@@ -106,7 +106,9 @@ public class LikesServiceImpl implements LikesService {
         long negative = likesRepository.countByLikeFalseAndEventId(eventId);
         long all = positive + negative;
 
-        if (all == 0) return 0;
+        if (all == 0) {
+            return 0L;
+        }
 
         // сначала рейтинг будет в диапазоне от 0 до 1
         double rating = ((positive + 1.9208) / all -
