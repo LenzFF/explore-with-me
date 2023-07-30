@@ -27,4 +27,11 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             "where ev.id in ?1 and req.status = ?2 and ev.participantLimit != 0 and count(req.id) < ev.participantLimit " +
             "group by ev.id ")
     List<Event> findAvailableEvents(Set<Long> eventIds, String status);
+
+
+    @Query("select avg(ev.rating) " +
+            "from Event as ev " +
+            "where ev.initiator.id = ?1 " +
+            "group by ev.id")
+    long getUserRating(long userId);
 }

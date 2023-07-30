@@ -19,4 +19,7 @@ public interface ParticipationRequestsService {
     List<ParticipationRequestDto> getUserParticipationRequests(long userId, long eventId);
 
     long getCountConfirmedRequestsByEvent(long eventId);
+
+    ParticipationRequestDto getUserRequestOnEvent(long userId, long eventId);
+
 }

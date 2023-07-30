@@ -22,4 +22,7 @@ public class User {
 
     @Column(name = "name", nullable = false, length = 255, unique = true)
     private String name;
+
+    @Column(name = "rating", nullable = false)
+    long rating = 0L;
 }

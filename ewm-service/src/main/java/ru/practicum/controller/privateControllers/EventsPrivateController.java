@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.*;
+import ru.practicum.dto.like.LikeDto;
 import ru.practicum.dto.participationRequest.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.participationRequest.EventRequestStatusUpdateResult;
 import ru.practicum.dto.participationRequest.ParticipationRequestDto;
 import ru.practicum.service.EventService;
+import ru.practicum.service.LikesService;
 import ru.practicum.service.ParticipationRequestsService;
 
 import javax.validation.Valid;
@@ -24,6 +26,7 @@ public class EventsPrivateController {
 
     private final EventService eventService;
     private final ParticipationRequestsService requestsService;
+    private final LikesService likesService;
 
 
     @PostMapping
@@ -41,10 +44,11 @@ public class EventsPrivateController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getUserEvents(@PathVariable(name = "userId") @Positive long userId,
+                                             @RequestParam(name = "sort", required = false) String sort,
                                              @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero int from,
                                              @RequestParam(name = "size", defaultValue = "10") @PositiveOrZero int size) {
 
-        List<EventShortDto> list = eventService.getAllUserEvents(userId, from, size);
+        List<EventShortDto> list = eventService.getAllUserEvents(userId, sort, from, size);
         log.info("Events found, userId - {}, from - {}, size - {}", userId, from, size);
 
         return list;
@@ -103,4 +107,26 @@ public class EventsPrivateController {
         return updateResult;
     }
 
+
+    @PostMapping("/{eventId}/likes")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LikeDto putLike(@PathVariable(name = "userId") @Positive long userId,
+                           @PathVariable(name = "eventId") @Positive long eventId,
+                           @Valid @RequestBody LikeDto likeDto) {
+
+        LikeDto newLike = likesService.putLike(eventId, userId, likeDto);
+        log.info("added a like - {}", newLike);
+
+        return newLike;
+    }
+
+
+    @DeleteMapping("/{eventId}/likes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeLike(@PathVariable(name = "userId") @Positive long userId,
+                           @PathVariable(name = "eventId") @Positive long eventId) {
+
+        likesService.removeLike(eventId, userId);
+        log.info("like removed, eventId - {}, userId - {}", eventId, userId);
+    }
 }
